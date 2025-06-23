@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Matricare - Send Live Location</title>
+</head>
+<body>
+  <h2 style="text-align:center;">Matricare: Sending Live Location</h2>
+  <p style="text-align:center;">Keep this tab open to share your live location.</p>
+
+  <script type="module">
+    // Import Firebase Modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGgmvX03lGE5hbA9sYuTBKvV_4Il-kFkE",
+      authDomain: "matricare-45675.firebaseapp.com",
+      databaseURL: "https://matricare-45675-default-rtdb.firebaseio.com/",
+      projectId: "matricare-45675",
+      storageBucket: "matricare-45675.appspot.com",
+      messagingSenderId: "262547281443",
+      appId: "1:262547281443:web:d9155c3afa0c2aa72b0396"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Function to send location
+    function sendLocation(lat, lng) {
+      set(ref(db, "liveTracking/worker1"), {
+        lat: lat,
+        lng: lng
+      });
+    }
+
+    // Watch live location
+    if ("geolocation" in navigator) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          console.log("Sending:", lat, lng);
+          sendLocation(lat, lng);
+        },
+        (error) => {
+          console.error("Location error:", error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 5000,
+          timeout: 7000
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  </script>
+</body>
+</html>
