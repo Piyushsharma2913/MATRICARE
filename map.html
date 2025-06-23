@@ -1,0 +1,65 @@
+		<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Matricare Live Tracking</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 style="text-align:center;">📍 Matricare Worker Tracking</h2>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <script>
+    // ✅ Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGgmvX03lGE5hbA9sYuTBKvV_4Il-kFkE",
+      authDomain: "matricare-45675.firebaseapp.com",
+      databaseURL: "https://matricare-45675-default-rtdb.firebaseio.com",
+      projectId: "matricare-45675",
+      storageBucket: "matricare-45675.appspot.com",
+      messagingSenderId: "262547281443",
+      appId: "1:262547281443:web:d9155c3afa0c2aa72b0396"
+    };
+
+    // ✅ Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // ✅ Initialize Leaflet map
+    const map = L.map('map').setView([26.9124, 75.7873], 7); // Centered at Rajasthan
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // ✅ Create marker with default location
+    const marker = L.marker([26.9124, 75.7873]).addTo(map);
+
+    // ✅ Live update from Firebase
+    database.ref('liveTracking/worker1').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.lat && data.lng) {
+        marker.setLatLng([data.lat, data.lng]);
+        map.setView([data.lat, data.lng], 15);
+      }
+    });
+  </script>
+</body>
+</html>
