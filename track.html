@@ -1,41 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Matricare - Send Live Location</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Matricare - Live Location Sender</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
 </head>
 <body>
-  <h2 style="text-align:center;">Matricare: Sending Live Location</h2>
-  <p style="text-align:center;">Keep this tab open to share your live location.</p>
+  <h2 style="text-align:center;">📍 Sending Live Location to Matricare</h2>
+  <div id="map"></div>
 
-  <script type="module">
-    // Import Firebase Modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    // Your Firebase config
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <script>
+    // ✅ Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCGgmvX03lGE5hbA9sYuTBKvV_4Il-kFkE",
       authDomain: "matricare-45675.firebaseapp.com",
-      databaseURL: "https://matricare-45675-default-rtdb.firebaseio.com/",
+      databaseURL: "https://matricare-45675-default-rtdb.firebaseio.com",
       projectId: "matricare-45675",
       storageBucket: "matricare-45675.appspot.com",
       messagingSenderId: "262547281443",
       appId: "1:262547281443:web:d9155c3afa0c2aa72b0396"
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    // ✅ Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
-    // Function to send location
+    // ✅ Create map
+    const map = L.map('map').setView([26.9124, 75.7873], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+    const marker = L.marker([26.9124, 75.7873]).addTo(map);
+
+    // ✅ Function to send location to Firebase
     function sendLocation(lat, lng) {
-      set(ref(db, "liveTracking/worker1"), {
+      const userRef = database.ref('liveTracking/worker1');
+      userRef.set({
         lat: lat,
-        lng: lng
+        lng: lng,
+        timestamp: Date.now()
       });
     }
 
-    // Watch live location
+    // ✅ Start watching user location
     if ("geolocation" in navigator) {
       navigator.geolocation.watchPosition(
         (position) => {
@@ -43,9 +67,12 @@
           const lng = position.coords.longitude;
           console.log("Sending:", lat, lng);
           sendLocation(lat, lng);
+          marker.setLatLng([lat, lng]);
+          map.setView([lat, lng], 16);
         },
         (error) => {
           console.error("Location error:", error.message);
+          alert("Location access denied or error.");
         },
         {
           enableHighAccuracy: true,
@@ -59,3 +86,6 @@
   </script>
 </body>
 </html>
+
+
+   
