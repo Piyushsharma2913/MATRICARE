@@ -2,32 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Matricare - Live Location Sender</title>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <style>
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Location - Matricare</title>
 </head>
 <body>
-  <h2 style="text-align:center;">📍 Sending Live Location to Matricare</h2>
-  <div id="map"></div>
+  <h2 style="text-align:center;">Sending Live Location...</h2>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
   <script>
-    // ✅ Your Firebase config
+    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCGgmvX03lGE5hbA9sYuTBKvV_4Il-kFkE",
       authDomain: "matricare-45675.firebaseapp.com",
@@ -42,46 +28,36 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // ✅ Create map
-    const map = L.map('map').setView([26.9124, 75.7873], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-    const marker = L.marker([26.9124, 75.7873]).addTo(map);
-
-    // ✅ Function to send location to Firebase
+    // ✅ Send location to Firebase
     function sendLocation(lat, lng) {
-      const userRef = database.ref('liveTracking/worker1');
-      userRef.set({
+      const data = {
         lat: lat,
         lng: lng,
         timestamp: Date.now()
-      });
+      };
+      database.ref("liveTracking/worker1").set(data);
     }
 
-    // ✅ Start watching user location
+    // ✅ Request Live Location
     if ("geolocation" in navigator) {
       navigator.geolocation.watchPosition(
         (position) => {
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
-          console.log("Sending:", lat, lng);
+          console.log("Location:", lat, lng);
           sendLocation(lat, lng);
-          marker.setLatLng([lat, lng]);
-          map.setView([lat, lng], 16);
         },
         (error) => {
-          console.error("Location error:", error.message);
-          alert("Location access denied or error.");
+          alert("Location Error: " + error.message);
         },
         {
           enableHighAccuracy: true,
-          maximumAge: 5000,
-          timeout: 7000
+          maximumAge: 10000,
+          timeout: 8000
         }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
+      alert("Your browser doesn't support geolocation.");
     }
   </script>
 </body>
